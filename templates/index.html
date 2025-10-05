@@ -125,13 +125,13 @@
       
     </style>
   </head>
-  <body
-    class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200"
-  >
+  <body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
     <div class="flex h-screen flex-col">
-      <header
-        class="flex items-center justify-between border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-3 shadow-sm"
-      >
+
+
+
+
+      <header class="flex items-center justify-between border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-3 shadow-sm">
         <div class="flex items-center gap-4">
           <svg
             class="h-6 w-6 text-primary"
@@ -162,7 +162,6 @@
         </div>
 
         <nav class="flex items-center gap-4">
-
           <button
             class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
           >
@@ -174,34 +173,46 @@
             Restore
           </button>
         </nav>
-
       </header>
+
+
+
+
+
+
+
       <main class="flex flex-1 overflow-hidden">
         <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6">
           <div class="flex w-full flex-1 gap-6">
+
             <div class="flex flex-1 flex-col items-center">
               <h2 class="mb-2 font-bold">Original</h2>
 
               {% if imagen_url %}
-              <div
-                class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden"
-              >
+              <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
                 <img src="{{ imagen_url }}" alt="Original Image" class="max-w-full max-h-full object-contain" />
               </div>
               {% endif %}
-
             </div>
+            
             <div class="flex flex-1 flex-col items-center">
+
               <h2 class="mb-2 font-bold">Processed</h2>
-              <div
-                class="w-full flex-1 rounded-lg border border-gray-200/80 dark:border-gray-700/80 bg-cover bg-center"
-                style="
-                  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDp5-rwhHrPTzTVDRoMKRVdsUl_fo09eVDPHivEQ6YZZKc7lGXnzMfMAEwdJfipQ6X9UEKdYJHURsO5DUYTegdyWBizoMtkT-Ixu_8bECQb01tG3D-3KuaXB3FJlwT7IQ0YT-NfTPsa5MZVmlYhAH2qiJMmgQM52cbV9BLk9gaYbPaq-rljyZDAIYwaWV8AfwGPit3wrHU3EopL5XbLm0zDQ6y0TWxt2sbzhjLJ3wcSPC8VXgQ9NiESXUDwv_JY0fY6pLfFnCuIpQA');
-                "
-              ></div>
+              {% if imagen_url %}
+              <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
+                <img src="{{ imagen_url }}" alt="Processed Image" class="max-w-full max-h-full object-contain" />
+              </div>
+              {% endif %}
             </div>
+
           </div>
         </div>
+
+
+
+
+        
+
         <aside
           class="w-96 overflow-y-auto border-l border-gray-200/80 dark:border-gray-700/80 p-4"
         >
