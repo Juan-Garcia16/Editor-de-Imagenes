@@ -143,38 +143,53 @@
               d="M12 2L2 7V17L12 22L22 17V7L12 2ZM4 8.5L12 13L20 8.5V15.5L12 20L4 15.5V8.5Z"
             ></path>
           </svg>
-          <h1 class="text-xl font-bold">Image Editor pablo</h1>
+
+          <h1 class="text-xl font-bold">Image Editor pablo xd</h1>
         </div>
+
+        <div>
+          <form method="POST" enctype="multipart/form-data" action="">
+            {% csrf_token %}
+            <input type="file" name="imagen" accept="image/*"
+              class="bg-primary/10 rounded pr-2 text-primary"
+              >
+            <button type="submit"
+              class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+            >
+            Cargar Imagen
+            </button>
+          </form>
+        </div>
+
         <nav class="flex items-center gap-4">
+
           <button
-            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-          >
-            <!--Es en text primary-->
-            Load Image
-          </button>
-          <button
-            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
           >
             Save Result
           </button>
           <button
-            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
           >
             Restore
           </button>
         </nav>
+
       </header>
       <main class="flex flex-1 overflow-hidden">
         <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6">
           <div class="flex w-full flex-1 gap-6">
             <div class="flex flex-1 flex-col items-center">
               <h2 class="mb-2 font-bold">Original</h2>
+
+              {% if imagen_url %}
               <div
-                class="w-full flex-1 rounded-lg border border-gray-200/80 dark:border-gray-700/80 bg-cover bg-center"
-                style="
-                  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCcAz0wQa7xl9qQA9ae7MNh0i419kIbWJTD4HVCBcy5TgPP0eKiwEZNKv60Rturos66Y1ZeGAjLAyyVPW2iZiejwDV6k-xV9p_mgRETobp44AJo8TgETvXBxlxp1p-J_Qc5bkpxFIKgjqGyVGfABcLJ-Yu7REUmlO-KSpXy22Qr0PxDl5BcIexFSUbaB0goz-YIt5z73ZRIFoLrwzrVU-lRCWlvJ7MYKB9XE2k8oZlVcfI_HOxW9zaMNXtXzQdRBK3KRLfELXq_GV8');
-                "
-              ></div>
+                class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden"
+              >
+                <img src="{{ imagen_url }}" alt="Original Image" class="max-w-full max-h-full object-contain" />
+              </div>
+              {% endif %}
+
             </div>
             <div class="flex flex-1 flex-col items-center">
               <h2 class="mb-2 font-bold">Processed</h2>
