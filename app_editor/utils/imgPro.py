@@ -34,13 +34,6 @@ def yellow(img):
     image_yellow[:,:,2] = 0 # Cancelar capa azul
     return image_yellow
 
-def reverse(img):
-    """
-    Invierte los colores de una imagen.
-    """
-    image_reverse = 1 - img
-    return image_reverse
-
 def remove_layer(img, capa):
     """
     Elimina una capa específica (0=Rojo, 1=Verde, 2=Azul) de una imagen RGB.
@@ -48,6 +41,44 @@ def remove_layer(img, capa):
     img_copia = np.copy(img)
     img_copia[:,:,capa] = 0
     return img_copia
+
+def extract_layer_rgb(img, capa):
+    """
+    Extrae una capa específica (0=Rojo, 1=Verde, 2=Azul) de una imagen RGB.
+    """
+    img_capa = np.zeros_like(img)
+    img_capa[:,:,capa] = img[:,:, capa]
+    return img_capa
+
+def extract_layer_cmy(img, capa):
+    """
+    Extrae una capa específica (0=Cian, 1=Magenta, 2=Amarillo) de una imagen RGB.
+    
+    La imagen se convierte a CMY, se aísla la capa indicada y 
+    se devuelve en formato RGB para visualizarla correctamente.
+    """
+    # Convertir de RGB a CMY
+    cmy = 1 - img
+
+    cmy_capa = np.zeros_like(cmy)
+
+    # Conservar solo la capa indicada (C, M o Y)
+    cmy_capa[:, :, capa] = cmy[:, :, capa]
+
+    # Convertir de nuevo a RGB para visualizar
+    rgb_resultado = 1 - cmy_capa
+
+    return rgb_resultado
+
+
+def reverse(img):
+    """
+    Invierte los colores de una imagen.
+    """
+    image_reverse = 1 - img
+    return image_reverse
+
+
 
 def image_resize(img1, img2, resize_method, w1, h1, w2, h2):
     """

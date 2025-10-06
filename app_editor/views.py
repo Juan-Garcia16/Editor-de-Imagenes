@@ -1,14 +1,105 @@
 from django.shortcuts import render
 from django.core.files.storage import FileSystemStorage # Importa FileSystemStorage para manejar archivos
+from .utils import imgPro
+import numpy as np
+from PIL import Image
+from django.core.files.base import ContentFile # Importa ContentFile para manejar archivos en memoria
+from io import BytesIO # Importa BytesIO para manejar buffers en memoria
 
 # Create your views here.
-def index(request):
-    imagen_url = None
-    # Si se envió un formulario
-    if request.method == 'POST' and request.FILES.get('imagen'):
-        imagen = request.FILES['imagen']
-        fs = FileSystemStorage()  # usa MEDIA_ROOT automáticamente
-        nombre_archivo = fs.save(imagen.name, imagen)
-        imagen_url = fs.url(nombre_archivo)  # genera /media/nombre.png
+
+def extract_layer(request, imagen_url, procesada_url, fs, capa, canal):
+    
+    ruta_original = request.POST.get('imagen_actual')  # ruta recibida del formulario
+    if ruta_original:
+        # abrir la imagen original desde MEDIA_ROOT
+        ruta_completa = fs.path(ruta_original.replace('/media/', '')) #convierte la url publica a una relativa
+        img = Image.open(ruta_completa).convert('RGB') # abre la imagen en disco en RGB
+        arr = np.array(img) / 255 # normalizada para uso correcto de la libreria
         
-    return render(request, 'index.html', {'imagen_url': imagen_url})
+        # transformacion con la libreria
+        if canal == "rgb":
+            nueva = imgPro.extract_layer_rgb(arr, capa) #para RGB
+        elif canal == "cmy":
+            nueva = imgPro.extract_layer_cmy(arr, capa) #para CMY
+        elif capa == None and canal == None:
+            nueva = imgPro.reverse(arr)
+        
+
+        # convertir de nuevo a imagen con valores de 255 lista para guardar
+        procesada = Image.fromarray((nueva * 255).astype(np.uint8)) 
+        
+        # guardar la imagen procesada en memoria temporal
+        buffer = BytesIO() # crea un buffer en memoria
+        procesada.save(buffer, format='PNG') # guarda la imagen procesada en png dentro del buffer
+        buffer.seek(0) # va al inicio del buffer para leer la imagen
+        
+        # guardar la imagen procesada en el sistema de archivos
+        nombre_resultado = f'{request.POST.get("accion")}_{ruta_original.split("/")[-1]}' # nombre para la nueva imagen
+        fs.save(nombre_resultado, ContentFile(buffer.read())) # lee los butes del buffer y los envuelve en un ContentFile para escribir en fisco con fs
+        buffer.close()
+        
+        imagen_url = ruta_original
+        procesada_url = fs.url(nombre_resultado)
+        
+    return [imagen_url, procesada_url]
+
+            
+def index(request):
+    imagen_url = request.POST.get('imagen_actual') if request.method == 'POST' else None # obtiene la imagen actual si es POST
+    procesada_url = None
+    fs = FileSystemStorage()  # usa MEDIA_ROOT y MEDIA_URL automáticamente, están definidos en settings.py
+    
+    # subir una imagen
+    if request.method == 'POST' and request.FILES.get('imagen'): # comprueba si contiene un archivo con clave imagen
+        imagen = request.FILES['imagen'] # obtiene el archivo subido
+        nombre_archivo = fs.save(imagen.name, imagen) # guarda el archivo en el almacenamiento (MEDIA_ROOT) y devuelve el nombre de guardado
+        imagen_url = fs.url(nombre_archivo)  # genera /media/nombre.png
+            
+    #=====RGB=======
+    # EXTRACT R
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_R':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 0, "rgb")
+        imagen_url = result[0]
+        procesada_url = result[1]
+    # EXTRACT G
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_G':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 1, "rgb")
+        imagen_url = result[0]
+        procesada_url = result[1]
+    # EXTRACT B
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_B':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 2, "rgb")
+        imagen_url = result[0]
+        procesada_url = result[1]
+        
+    #=====CMY=======
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_C':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 0, "cmy")
+        imagen_url = result[0]
+        procesada_url = result[1]
+    # EXTRACT G
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_M':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 1, "cmy")
+        imagen_url = result[0]
+        procesada_url = result[1]
+    # EXTRACT B
+    elif request.method == 'POST' and request.POST.get('accion') == 'extract_Y':
+        result = extract_layer(request, imagen_url, procesada_url, fs, 2, "cmy")
+        imagen_url = result[0]
+        procesada_url = result[1]
+        
+    #=====NEGATIVO=======
+    elif request.method == 'POST' and request.POST.get('accion') == 'negativo':
+        result = extract_layer(request, imagen_url, procesada_url, fs, None, None)
+        imagen_url = result[0]
+        procesada_url = result[1]
+       
+
+    context = {
+        'imagen_url': imagen_url,
+        'procesada_url': procesada_url
+    }
+    
+    return render(request, 'index.html', context)
+

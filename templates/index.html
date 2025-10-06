@@ -198,9 +198,9 @@
             <div class="flex flex-1 flex-col items-center">
 
               <h2 class="mb-2 font-bold">Processed</h2>
-              {% if imagen_url %}
+              {% if procesada_url %}
               <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
-                <img src="{{ imagen_url }}" alt="Processed Image" class="max-w-full max-h-full object-contain" />
+                <img src="{{ procesada_url }}" alt="Processed Image" class="max-w-full max-h-full object-contain" />
               </div>
               {% endif %}
             </div>
@@ -278,48 +278,90 @@
                 </div>
               </div>
             </div>
+
+
+
+
+
+
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
               <h3 class="font-bold">Layers and Colors</h3>
-              <div class="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract R
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract C
-                </button>
+              <form method="POST" action="">
+                {% csrf_token %}
+                {% if imagen_url %}
+                  <input type="hidden" name="imagen_actual" value="{{ imagen_url }}">
+                {% endif %}
 
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract G
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract M
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract B
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract Y
-                </button>
-              </div>
-              <button
-                class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-              >
-                Negative
-              </button>
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_R"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract R
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_C"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract C
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_G"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract G
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_M"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract M
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_B"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract B
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="extract_Y"
+                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
+                          dark:bg-primary/20 dark:hover:bg-primary/30">
+                    Extract Y
+                  </button>
+
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="negativo"
+                    class=" w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20      
+                          dark:hover:bg-primary/30 col-span-2">
+                    Negative
+                  </button>
+
+                </div>
+              </form>
+
+              
               <select
                 class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
               >
@@ -329,6 +371,10 @@
                 <option>Mid-gray</option>
               </select>
             </div>
+
+
+
+
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
