@@ -186,9 +186,8 @@
           <div class="flex w-full flex-1 gap-6">
 
             <div class="flex flex-1 flex-col items-center">
-              <h2 class="mb-2 font-bold">Original</h2>
-
               {% if imagen_url %}
+              <h2 class="mb-2 font-bold">Original</h2>
               <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
                 <img src="{{ imagen_url }}" alt="Original Image" class="max-w-full max-h-full object-contain" />
               </div>
@@ -196,9 +195,8 @@
             </div>
             
             <div class="flex flex-1 flex-col items-center">
-
-              <h2 class="mb-2 font-bold">Processed</h2>
               {% if procesada_url %}
+              <h2 class="mb-2 font-bold">Processed</h2>
               <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
                 <img src="{{ procesada_url }}" alt="Processed Image" class="max-w-full max-h-full object-contain" />
               </div>
@@ -359,17 +357,26 @@
                   </button>
 
                 </div>
+
+                <select
+                  name="tipo_grises"
+                  class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark
+                        focus:border-primary focus:ring-primary">
+                  <option value="">Grayscale</option>
+                  <option value="average">Average</option>
+                  <option value="luminosity">Luminosity</option>
+                  <option value="midgray">Midgray</option>
+                  </select>
+                <button
+                  type="submit"
+                  name="accion"
+                  value="grayscale"
+                  class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20">
+                  Apply Grayscale
+                </button>
               </form>
 
-              
-              <select
-                class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
-              >
-                <option>Grayscale</option>
-                <option>Average</option>
-                <option>Luminosity</option>
-                <option>Mid-gray</option>
-              </select>
+            
             </div>
 
 

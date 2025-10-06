@@ -139,26 +139,32 @@ def fusion_images_ecualized(img1, img2, factor):
     return img_fusionada
 
 def average(img):
-    """
-    Convierte una imagen a escala de grises usando el método del promedio."""
-    img_copia = np.copy(img)
-    return (img_copia[:,:,0] + img_copia[:,:,1] + img_copia[:,:,2]) / 3
+   """
+   Convierte una imagen a escala de grises usando el método del promedio."""
+   img_copia = np.copy(img)
+   gris = (img_copia[:,:,0] + img_copia[:,:,1] + img_copia[:,:,2]) / 3
+   # print("Promedio de gris 1:", np.mean(gris))  # <--- línea temporal
+   return np.stack((gris, gris, gris), axis=-1) # convertir la imagen 2d a RGB con la misma intensidad en los 3 canales pra visualizacion en el navegador
 
 def luminosity(img):
-    """
-    Convierte una imagen a escala de grises usando el método de luminosidad.
-    """
-    img_copia = np.copy(img)
-    return 0.299*img_copia[:,:,0] + 0.587*img_copia[:,:,1] + 0.114*img_copia[:,:,2]
+   """
+   Convierte una imagen a escala de grises usando el método de luminosidad.
+   """
+   img_copia = np.copy(img)
+   gris = 0.299*img_copia[:,:,0] + 0.587*img_copia[:,:,1] + 0.114*img_copia[:,:,2]
+   # print("Promedio de gris 2:", np.mean(gris))  # <--- línea temporal
+   return np.stack((gris, gris, gris), axis=-1)
+
 
 def midgray(img):
-    """
-    Convierte una imagen a escala de grises usando el método de gris medio.
-    """
-    img_copia = np.copy(img)
-    midgray = (np.maximum(img_copia[:,:,0], img_copia[:,:,1], img_copia[:,:,2]) +
-               np.minimum(img_copia[:,:,0], img_copia[:,:,1], img_copia[:,:,2]))/2
-    return midgray
+   """
+   Convierte una imagen a escala de grises usando el método de gris medio.
+   """
+   img_copia = np.copy(img)
+   gris = (np.maximum(img_copia[:,:,0], img_copia[:,:,1], img_copia[:,:,2]) +
+              np.minimum(img_copia[:,:,0], img_copia[:,:,1], img_copia[:,:,2]))/2
+   # print("Promedio de gris 3:", np.mean(gris))  # <--- línea temporal
+   return np.stack((gris, gris, gris), axis=-1)
 
 def bright(img, brillo):
     """
