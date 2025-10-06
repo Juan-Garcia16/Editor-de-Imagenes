@@ -5,11 +5,15 @@ import numpy as np
 from PIL import Image
 from django.core.files.base import ContentFile # Importa ContentFile para manejar archivos en memoria
 from io import BytesIO # Importa BytesIO para manejar buffers en memoria
+import time
+from django.http import HttpResponse
+import uuid # Importa el módulo uuid para generar identificadores únicos
+
 
 # Create your views here.
 
+
 def extract_layer(request, imagen_url, procesada_url, fs, capa, canal, tipo_grises=None):
-  
    ruta_original = request.POST.get('imagen_actual')  # ruta recibida del formulario
    if ruta_original:
        # abrir la imagen original desde MEDIA_ROOT
@@ -43,7 +47,7 @@ def extract_layer(request, imagen_url, procesada_url, fs, capa, canal, tipo_gris
       
        procesada = Image.fromarray((np.clip(nueva, 0, 1) * 255).astype(np.uint8), mode="RGB")
        # procesada = Image.fromarray((nueva[:, :, 0] * 255).astype(np.uint8), mode="L")
-    #    procesada = Image.fromarray((nueva * 255).astype(np.uint8))
+       # procesada = Image.fromarray((nueva * 255).astype(np.uint8))
       
        # guardar la imagen procesada en memoria temporal
        buffer = BytesIO() # crea un buffer en memoria
@@ -117,9 +121,29 @@ def index(request):
        imagen_url = result[0]
        procesada_url = result[1]
        
+   elif request.method == 'POST' and request.POST.get('accion') == 'aplicar_brillo':
+    ruta_original = request.POST.get('imagen_actual')
+    if ruta_original:
+        ruta_completa = fs.path(ruta_original.replace('/media/', ''))
+        img = Image.open(ruta_completa).convert('RGB')
+        arr = np.array(img) / 255.0
+        valor_brillo = float(request.POST.get('valor_brillo', '0'))
+        arr_mod = imgPro.bright(arr, valor_brillo)
+        arr_mod = np.clip(arr_mod, 0, 1)
+        procesada = Image.fromarray((arr_mod * 255).astype(np.uint8), mode="RGB")
+        buffer = BytesIO()
+        procesada.save(buffer, format='PNG')
+        buffer.seek(0)
+        # nombre_resultado = f'brillo_{ruta_original.split("/")[-1]}'
+        nombre_resultado = f'brillo_{uuid.uuid4().hex}_{ruta_original.split("/")[-1]}'
+        fs.save(nombre_resultado, ContentFile(buffer.read()))
+        buffer.close()
+        imagen_url = ruta_original  # Siempre apunta a la original para más operaciones
+        # procesada_url = fs.url(nombre_resultado)
+        procesada_url = fs.url(nombre_resultado) + '?v=' + str(int(time.time())) # Añade un query string para evitar caché
+       
    context = {
        'imagen_url': imagen_url,
        'procesada_url': procesada_url
    }
    return render(request, 'index.html', context)
-

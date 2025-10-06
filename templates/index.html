@@ -13,51 +13,6 @@
     />
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 
-    <!-- <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: "#06ecf4",
-              "background-light": "#f5f8f8",
-              "background-dark": "#0f2223",
-            },
-            fontFamily: { display: "Space Grotesk" },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              full: "9999px",
-            },
-          },
-        },
-      };
-    </script> -->
-
-
-    <!-- <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: "#0da695",
-              "background-light": "#f6f8f8",
-              "background-dark": "#102220",
-            },
-            fontFamily: { display: "Space Grotesk" },
-            borderRadius: {
-              DEFAULT: "0.25rem",
-              lg: "0.5rem",
-              xl: "0.75rem",
-              full: "9999px",
-            },
-          },
-        },
-      };
-    </script> -->
-
     <script>
       tailwind.config = {
         darkMode: "class",
@@ -195,6 +150,8 @@
             </div>
             
             <div class="flex flex-1 flex-col items-center">
+              
+
               {% if procesada_url %}
               <h2 class="mb-2 font-bold">Processed</h2>
               <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
@@ -218,62 +175,177 @@
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
-              <h3 class="font-bold">Brightness and Contrast</h3>
-              <div class="mt-4 space-y-4">
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">Global Brightness</label>
+              <h3 class="font-bold pb-4">Brightness and Contrast</h3>
+              <form method="POST" action="">
+              {% csrf_token %}
+              {% if imagen_url %}
+                <input type="hidden" name="imagen_actual" value="{{ imagen_url }}">
+              {% endif %}
+
+              <!-- Ejemplo slider con label arriba, fila con slider, valor y botón -->
+              <div class="mb-2">
+                <label for="slider-brillo" class="block text-sm ">Global Brightness</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-brillo"
+                    name="valor_brillo"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-brillo" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_brillo"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">R Channel</label>
+              </div>
+
+              <div class="mb-2">
+                <label for="slider-r" class="block text-sm">R Channel</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-r"
+                    name="valor_r"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-r" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_brillo_R"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">G Channel</label>
+              </div>
+
+              <div class="mb-2">
+                <label for="slider-g" class="block text-sm">G Channel</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-g"
+                    name="valor_g"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-g" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_brillo_G"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">B Channel</label>
+              </div>
+
+              <div class="mb-2">
+                <label for="slider-b" class="block text-sm">B Channel</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-b"
+                    name="valor_b"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-b" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_brillo_B"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">Logarithmic Contrast</label>
+              </div>
+
+              <div class="mb-2">
+                <label for="slider-logarithmic" class="block text-sm">Logarithmic Contrast</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-logarithmic"
+                    name="valor_logarithmic"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-logarithmic" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_contraste_logaritmico"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">Exponential Contrast</label>
+              </div>
+
+              <div class="mb-2">
+                <label for="slider-exponential" class="block text-sm">Exponential Contrast</label>
+                <div class="flex items-center space-x-4">
                   <input
-                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    id="slider-exponential"
+                    name="valor_exponential"
                     type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
+                  <span id="output-exponential" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
+                  <button
+                    type="submit"
+                    name="accion"
+                    value="aplicar_contraste_exponencial"
+                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
                 </div>
+              </div>
+            </form>
+
               </div>
             </div>
 
@@ -524,5 +596,26 @@
         </p>
       </footer>
     </div>
+
+  <script>
+    // Función para actualizar el valor visible para cada slider
+    function actualizarValor(idSlider, idOutput) {
+      const slider = document.getElementById(idSlider);
+      const output = document.getElementById(idOutput);
+
+      slider.addEventListener('input', () => {
+        output.textContent = slider.value;
+      });
+      output.textContent = slider.value;
+    }
+
+    actualizarValor('slider-brillo', 'output-brillo');
+    actualizarValor('slider-r', 'output-r');
+    actualizarValor('slider-g', 'output-g');
+    actualizarValor('slider-b', 'output-b');
+    actualizarValor('slider-logarithmic', 'output-logarithmic');
+    actualizarValor('slider-exponential', 'output-exponential');
+  </script>
+
   </body>
 </html>
