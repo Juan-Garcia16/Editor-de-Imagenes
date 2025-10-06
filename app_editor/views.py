@@ -11,8 +11,6 @@ import uuid # Importa el módulo uuid para generar identificadores únicos
 
 
 # Create your views here.
-
-
 def extract_layer(request, imagen_url, procesada_url, fs, capa, canal, tipo_grises=None):
    ruta_original = request.POST.get('imagen_actual')  # ruta recibida del formulario
    if ruta_original:
