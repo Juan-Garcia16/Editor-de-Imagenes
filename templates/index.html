@@ -302,31 +302,39 @@
               <div class="mt-4 grid grid-cols-2 gap-2">
                 <button
                   class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('rgb_layer', {capa: 'R'})"
                 >
                   Extract R
                 </button>
                 <button
                   class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract G
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-                >
-                  Extract B
-                </button>
-                <button
-                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('cmy_layer', {capa: 'C'})"
                 >
                   Extract C
                 </button>
+
                 <button
                   class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('rgb_layer', {capa: 'G'})"
+                >
+                  Extract G
+                </button>
+
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('cmy_layer', {capa: 'M'})"
                 >
                   Extract M
                 </button>
                 <button
                   class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('rgb_layer', {capa: 'B'})"
+                >
+                  Extract B
+                </button>
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="applyAction('cmy_layer', {capa: 'Y'})"
                 >
                   Extract Y
                 </button>

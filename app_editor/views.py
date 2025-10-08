@@ -4,40 +4,10 @@ from django.http import JsonResponse
 from PIL import Image
 import io, base64
 from django.views.decorators.csrf import csrf_exempt
+from .utils import imgPro
 
 def index(request):
     return render(request, "index.html")
-
-def bright(img, brillo):
-    """
-    Altera el brillo de una imagen normalizada [0 , 1].
-    """
-    img_cop = np.copy(img)
-    img_cop = img_cop + brillo
-    img_cop = np.clip(img_cop, 0, 1)
-    return img_cop
-
-
-def extract_channel(img, channel):
-    """
-    Extrae una capa RGB de una imagen normalizada [0,1].
-    - img: numpy array H,W,3 con valores en [0,1]
-    - channel: 'R', 'G' o 'B' (case-insensitive)
-
-    Devuelve una imagen H,W,3 donde sólo la componente solicitada conserva
-    su valor original y las demás quedan en 0. Esto facilita mostrar sólo
-    la capa seleccionada manteniendo la estructura RGB para que el navegador
-    la renderice correctamente.
-    """
-    ch = channel.upper() if isinstance(channel, str) else 'R'
-    idx_map = {'R': 0, 'G': 1, 'B': 2}
-    if ch not in idx_map:
-        ch = 'R'
-    idx = idx_map[ch]
-    out = np.zeros_like(img)
-    out[..., idx] = img[..., idx]
-    return out
-
 
 def _to_data_url(img_array):
     """
@@ -67,11 +37,32 @@ def process_image(request):
             # Dispatch simple: elegir la función según action
             if action == "bright":
                 brillo = float(request.POST.get("brillo", 0))
-                result_np = bright(img_np, brillo)
-            elif action == "channel":
-                # Esperamos un parámetro 'channel' con 'R'|'G'|'B'
-                channel = request.POST.get("channel", "R")
-                result_np = extract_channel(img_np, channel)
+                result_np = imgPro.bright(img_np, brillo)
+
+            elif action == "rgb_layer":
+                # 'capa' puede venir como '0','1','2' o 'R','G','B'
+                capa_raw = request.POST.get("capa", "0")
+                try:
+                    capa = int(capa_raw)
+                except ValueError:
+                    map_chr = {'R':0,'G':1,'B':2}
+                    capa = map_chr.get(capa_raw.upper(), 0)
+                if capa not in (0,1,2):
+                    return JsonResponse({"error":"capa invalida"}, status=400)
+                result_np = imgPro.extract_layer_rgb(img_np, capa)
+
+            elif action == "cmy_layer":
+                # 'capa' puede venir como '0','1','2' o 'C','M','Y'
+                capa_raw = request.POST.get("capa", "0")
+                try:
+                    capa = int(capa_raw)
+                except ValueError:
+                    map_chr = {'C':0,'M':1,'Y':2}
+                    capa = map_chr.get(capa_raw.upper(), 0)
+                if capa not in (0,1,2):
+                    return JsonResponse({"error":"capa invalida"}, status=400)
+                result_np = imgPro.extract_layer_cmy(img_np, capa)
+
             else:
                 return JsonResponse({"error": f"Operacion no soportada: {action}"}, status=400)
 
