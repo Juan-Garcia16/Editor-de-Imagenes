@@ -101,6 +101,70 @@ def process_image(request):
                     result_np = img_np #no aplicar nada
                     
                     
+            # --- FUSION: promedio simple ---
+            elif action == 'merge':
+                # requiere ambos archivos
+                if not request.FILES.get('image') or not request.FILES.get('image2'):
+                    return JsonResponse({'error': 'Se requieren dos imágenes para fusionar.'}, status=400)
+
+                resize_method = request.POST.get('resize_method', 'resize_to_smaller') #opciones: resize_to_smaller, resize_to_larger, resize_second_to_first, por defecto resize_to_smaller
+
+                # abrir ambas con PIL
+                img1_pil = Image.open(request.FILES['image']).convert('RGB')
+                img2_pil = Image.open(request.FILES['image2']).convert('RGB')
+
+
+                try:
+                    result_np = imgPro.fusion_images(img1_pil, img2_pil, resize_method=resize_method)
+                except Exception as e:
+                    return JsonResponse({'error': f'Error fusionando: {e}'}, status=500)
+
+                # Asegurar rango y devolver
+                result_np = np.clip(result_np, 0, 1)
+                data_url = _to_data_url(result_np)
+                return JsonResponse({'image': data_url})
+
+            # --- FUSION ECUALIZADA: factor entre 0..1 ---
+            elif action == 'merge_eq': #slider factor
+                if not request.FILES.get('image') or not request.FILES.get('image2'):
+                    return JsonResponse({'error': 'Se requieren dos imágenes para fusionar.'}, status=400)
+
+                # parsear factor
+                try:
+                    factor = float(request.POST.get('factor', 0.5))
+                except ValueError:
+                    return JsonResponse({'error': 'factor invalido'}, status=400)
+                factor = max(0.0, min(1.0, factor))
+
+                resize_method = request.POST.get('resize_method', 'resize_to_smaller')
+
+                # Abrir ambas imágenes
+                img1_pil = Image.open(request.FILES['image']).convert('RGB')
+                img2_pil = Image.open(request.FILES['image2']).convert('RGB')
+
+                # Verificar si son del mismo tamaño: calcular target con image_resize y redimensionar
+                w1, h1 = img1_pil.size
+                w2, h2 = img2_pil.size
+                target_size = imgPro.image_resize(img1_pil, img2_pil, resize_method, w1, h1, w2, h2)
+                if (w1, h1) != target_size:
+                    img1_pil = img1_pil.resize(target_size)
+                if (w2, h2) != target_size:
+                    img2_pil = img2_pil.resize(target_size)
+
+                # Convertir a numpy normalizado
+                img1_np = np.asarray(img1_pil, dtype=np.float32) / 255
+                img2_np = np.asarray(img2_pil, dtype=np.float32) / 255
+
+                try:
+                    result_np = imgPro.fusion_images_ecualized(img1_np, img2_np, factor)
+                except Exception as e:
+                    return JsonResponse({'error': f'Error fusionando ecualizadas: {e}'}, status=500)
+
+                result_np = np.clip(result_np, 0, 1)
+                data_url = _to_data_url(result_np)
+                return JsonResponse({'image': data_url})
+                                
+                    
                     
                     
                     
