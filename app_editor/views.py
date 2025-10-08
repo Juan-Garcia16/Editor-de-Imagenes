@@ -38,6 +38,25 @@ def process_image(request):
             if action == "bright":
                 brillo = float(request.POST.get("brillo", 0))
                 result_np = imgPro.bright(img_np, brillo)
+                
+            elif action == 'R_channel':
+                valor = float(request.POST.get("R_channel", 0))
+                result_np = imgPro.bright_layer(img_np, valor, 0)
+            elif action == 'G_channel':
+                valor = float(request.POST.get("G_channel", 0))
+                result_np = imgPro.bright_layer(img_np, valor, 1)
+            elif action == 'B_channel':
+                valor = float(request.POST.get("B_channel", 0))
+                result_np = imgPro.bright_layer(img_np, valor, 2)
+                
+            elif action == "log_contrast":
+                contraste = float(request.POST.get("log_contrast", 0))
+                result_np = imgPro.contrast_dark(img_np, contraste)
+
+            elif action == "exp_contrast":
+                contraste = float(request.POST.get("exp_contrast", 0))
+                result_np = imgPro.contrast_light(img_np, contraste)
+
 
             elif action == "rgb_layer":
                 # 'capa' puede venir como '0','1','2' o 'R','G','B'

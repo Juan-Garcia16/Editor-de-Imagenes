@@ -181,6 +181,7 @@ def bright_layer(img, brillo, capa):
     """
     img_capa = np.copy(img)
     img_capa[:,:,capa] = img[:,:,capa] + brillo
+    img_capa = np.clip(img_capa, 0, 1)
     return img_capa
 
 def contrast_dark(img, contraste):

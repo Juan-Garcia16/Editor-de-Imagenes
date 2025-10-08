@@ -90,17 +90,19 @@
         const fileInput = document.getElementById("imageInput");
         if (!fileInput.files.length) return;
         uploadedFile = fileInput.files[0];
-        document.getElementById("original").src =
-          URL.createObjectURL(uploadedFile);
-        await updateBrightness(); // aplicar brillo inicial
+        document.getElementById("original").src = URL.createObjectURL(uploadedFile);
+        await updateSliders(); // aplicar brillo inicial en 0 para mostrar la imagen
       }
 
-      async function updateBrightness() {
+      async function updateSliders(id='slider_brillo', action='bright', paramName='brillo') {
         if (!uploadedFile) return;
 
         const formData = new FormData();
         formData.append("image", uploadedFile);
-        formData.append("brillo", document.getElementById("slider_brillo").value);
+        // Campo obligatorio para que el servidor haga dispatch
+        formData.append("action", action);
+        // Añadimos el valor del slider bajo el nombre esperado por el servidor
+        formData.append(paramName, document.getElementById(id).value);
 
         try {
           const response = await fetch("/process/", {
@@ -249,7 +251,7 @@
                     step="0.01"
                     value="0"
                     id="slider_brillo"
-                    oninput="updateBrightness()"
+                    oninput="updateSliders()"
                   />
                 </div>
 
@@ -258,45 +260,65 @@
                   <label class="col-span-3 text-sm">R Channel</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    min="-1"
+                    max="1"
                     type="range"
+                    step="0.01"
+                    value="0"
+                    id="slider_R_channel"
+                    oninput="updateSliders('slider_R_channel', 'R_channel', 'R_channel')"
                   />
                 </div>
                 <div class="grid grid-cols-5 items-center gap-2">
                   <label class="col-span-3 text-sm">G Channel</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    min="-1"
+                    max="1"
                     type="range"
+                    step="0.01"
+                    value="0"
+                    id="slider_G_channel"
+                    oninput="updateSliders('slider_G_channel', 'G_channel', 'G_channel')"
                   />
                 </div>
                 <div class="grid grid-cols-5 items-center gap-2">
                   <label class="col-span-3 text-sm">B Channel</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    min="-1"
+                    max="1"
                     type="range"
+                    step="0.01"
+                    value="0"
+                    id="slider_B_channel"
+                    oninput="updateSliders('slider_B_channel', 'B_channel', 'B_channel')"
                   />
                 </div>
                 <div class="grid grid-cols-5 items-center gap-2">
                   <label class="col-span-3 text-sm">Logarithmic Contrast</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    min="-1"
+                    max="1"
                     type="range"
+                    step="0.01"
+                    value="0"
+                    id="log_contrast"
+                    oninput="updateSliders('log_contrast', 'log_contrast', 'log_contrast')"
                   />
                 </div>
                 <div class="grid grid-cols-5 items-center gap-2">
                   <label class="col-span-3 text-sm">Exponential Contrast</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
-                    max="100"
-                    min="0"
+                    min="-1"
+                    max="1"
                     type="range"
+                    step="0.01"
+                    value="0"
+                    id="exp_contrast"
+                    oninput="updateSliders('exp_contrast', 'exp_contrast', 'exp_contrast')"
                   />
                 </div>
               </div>
@@ -351,7 +373,7 @@
               >
                 Negative
               </button>
-              
+
               <select
                 id="grayscale_type"
                 name="tipo"
