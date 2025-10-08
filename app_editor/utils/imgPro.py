@@ -71,7 +71,7 @@ def extract_layer_cmy(img, capa):
     return rgb_resultado
 
 
-def reverse(img):
+def negative(img):
     """
     Invierte los colores de una imagen.
     """

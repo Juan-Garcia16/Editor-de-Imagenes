@@ -27,10 +27,10 @@ def process_image(request):
         # Este endpoint soporta varias 'actions' (por ejemplo 'bright' o 'channel').
         # El frontend envía un multipart/form-data con al menos el campo 'image'.
         if request.method == "POST" and request.FILES.get("image"):
-            # action determina la operación a aplicar. Por defecto 'bright'.
+            # action determina la operación a aplicar. Por defecto 'bright' para que se presente la imagen.
             action = request.POST.get("action", "bright")
 
-            # Abrir imagen y normalizar a float en [0,1]
+            # Abrir imagen y normalizar 
             image = Image.open(request.FILES["image"]).convert("RGB")
             img_np = np.asarray(image, dtype=np.float32) / 255.0
 
@@ -62,6 +62,29 @@ def process_image(request):
                 if capa not in (0,1,2):
                     return JsonResponse({"error":"capa invalida"}, status=400)
                 result_np = imgPro.extract_layer_cmy(img_np, capa)
+                
+            elif action == "negative":
+                result_np = imgPro.negative(img_np)
+
+            elif action == "grayscale":
+                # leer parámetro 'tipo' (string)
+                tipo = request.POST.get("tipo", "")
+                # empezar con la imagen normalizada
+                result_np = img_np.copy()
+
+                if tipo == 'average':
+                    result_np = imgPro.average(result_np)
+                elif tipo == 'luminosity':
+                    result_np = imgPro.luminosity(result_np)
+                elif tipo == 'midgray':
+                    result_np = imgPro.midgray(result_np)
+                else:
+                    result_np = img_np #no aplicar nada
+                    
+                    
+                    
+                    
+                    
 
             else:
                 return JsonResponse({"error": f"Operacion no soportada: {action}"}, status=400)

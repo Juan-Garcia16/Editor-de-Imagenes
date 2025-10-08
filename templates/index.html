@@ -162,6 +162,12 @@
         link.download = "imagen_procesada.png";
         link.click();
       }
+
+      function applyGrayscale() {
+        const tipo = document.getElementById('grayscale_type').value;
+        // enviar la acción y el parámetro 'tipo'
+        applyAction('grayscale', { tipo: tipo });
+  }
     </script>
   </head>
   <body
@@ -341,16 +347,21 @@
               </div>
               <button
                 class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                onclick="applyAction('negative')"
               >
                 Negative
               </button>
+              
               <select
+                id="grayscale_type"
+                name="tipo"
+                onchange="applyAction('grayscale', {tipo: this.value})"
                 class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
               >
-                <option>Grayscale</option>
-                <option>Average</option>
-                <option>Luminosity</option>
-                <option>Mid-gray</option>
+                <option value="">Grayscale</option>
+                <option value="average">Average</option>
+                <option value="luminosity">Luminosity</option>
+                <option value="midgray">Midgray</option>
               </select>
             </div>
             <div
