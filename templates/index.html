@@ -77,16 +77,100 @@
         cursor: pointer;
         border: 2px solid #ffffff;
       }
-      
+      img {
+        background-color: white;
+      }
     </style>
+
+    <script>
+      let uploadedFile = null;
+      let currentImage = null;
+
+      async function uploadImage() {
+        const fileInput = document.getElementById("imageInput");
+        if (!fileInput.files.length) return;
+        uploadedFile = fileInput.files[0];
+        document.getElementById("original").src =
+          URL.createObjectURL(uploadedFile);
+        await updateBrightness(); // aplicar brillo inicial
+      }
+
+      async function updateBrightness() {
+        if (!uploadedFile) return;
+
+        const formData = new FormData();
+        formData.append("image", uploadedFile);
+        formData.append("brillo", document.getElementById("slider_brillo").value);
+
+        try {
+          const response = await fetch("/process/", {
+            method: "POST",
+            body: formData,
+            headers: { "X-Requested-With": "XMLHttpRequest" }, // ayuda a Django
+          });
+
+          const data = await response.json();
+
+          if (data.image) {
+            document.getElementById("processed").src = data.image;
+            currentImage = data.image;
+          } else if (data.error) {
+            console.error("Error del servidor:", data.error);
+          }
+        } catch (error) {
+          console.error("Error al comunicarse con el servidor:", error);
+        }
+      }
+
+      // applyAction: función genérica para enviar una 'action' al endpoint
+      // - actionName: string con la operación ('channel', 'bright', ...)
+      // - params: objeto con parámetros adicionales que se añadirán al FormData
+      // Uso: applyAction('channel', { channel: 'R' })
+      async function applyAction(actionName, params = {}) {
+        if (!uploadedFile) return;
+
+        const formData = new FormData();
+        formData.append("image", uploadedFile);
+        formData.append("action", actionName);
+        for (const k in params) {
+          formData.append(k, params[k]);
+        }
+
+        try {
+          const response = await fetch("/process/", {
+            method: "POST",
+            body: formData,
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+
+          const data = await response.json();
+          if (data.image) {
+            document.getElementById("processed").src = data.image;
+            currentImage = data.image;
+          } else if (data.error) {
+            console.error("Error del servidor:", data.error);
+          }
+        } catch (error) {
+          console.error("Error al comunicarse con el servidor:", error);
+        }
+      }
+
+      function downloadImage() {
+        if (!currentImage) return;
+        const link = document.createElement("a");
+        link.href = currentImage;
+        link.download = "imagen_procesada.png";
+        link.click();
+      }
+    </script>
   </head>
-  <body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200">
+  <body
+    class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200"
+  >
     <div class="flex h-screen flex-col">
-
-
-
-
-      <header class="flex items-center justify-between border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-3 shadow-sm">
+      <header
+        class="flex items-center justify-between border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-3 shadow-sm"
+      >
         <div class="flex items-center gap-4">
           <svg
             class="h-6 w-6 text-primary"
@@ -98,76 +182,47 @@
               d="M12 2L2 7V17L12 22L22 17V7L12 2ZM4 8.5L12 13L20 8.5V15.5L12 20L4 15.5V8.5Z"
             ></path>
           </svg>
-
-          <h1 class="text-xl font-bold">Image Editor pablo xd</h1>
+          <h1 class="text-xl font-bold">Image Editor</h1>
         </div>
-
-        <div>
-          <form method="POST" enctype="multipart/form-data" action="">
-            {% csrf_token %}
-            <input type="file" name="imagen" accept="image/*"
-              class="bg-primary/10 rounded pr-2 text-primary"
-              >
-            <button type="submit"
-              class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
-            >
-            Cargar Imagen
-            </button>
-          </form>
-        </div>
+        
+        <input type="file" id="imageInput" accept="image/*" onchange="uploadImage()">
 
         <nav class="flex items-center gap-4">
           <button
-            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
           >
             Save Result
           </button>
           <button
-            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-white hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+            class="rounded bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
           >
             Restore
           </button>
         </nav>
       </header>
-
-
-
-
-
-
-
       <main class="flex flex-1 overflow-hidden">
         <div class="flex flex-1 flex-col items-center justify-center gap-6 p-6">
           <div class="flex w-full flex-1 gap-6">
-
             <div class="flex flex-1 flex-col items-center">
-              {% if imagen_url %}
               <h2 class="mb-2 font-bold">Original</h2>
-              <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
-                <img src="{{ imagen_url }}" alt="Original Image" class="max-w-full max-h-full object-contain" />
-              </div>
-              {% endif %}
+              <div
+                class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80"
+              >
+              <img id="original" src="" alt=""
+              class="max-w-full max-h-full object-contain">
             </div>
-            
+            </div>
             <div class="flex flex-1 flex-col items-center">
-              
-
-              {% if procesada_url %}
               <h2 class="mb-2 font-bold">Processed</h2>
-              <div class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80">
-                <img src="{{ procesada_url }}" alt="Processed Image" class="max-w-full max-h-full object-contain" />
-              </div>
-              {% endif %}
+              <div
+                class="w-full flex-1 bg-cover bg-center flex items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 dark:border-gray-700/80"
+              >
+              <img id="processed" src="" alt=""
+              class="max-w-full max-h-full object-contain">
             </div>
-
+            </div>
           </div>
         </div>
-
-
-
-
-        
-
         <aside
           class="w-96 overflow-y-auto border-l border-gray-200/80 dark:border-gray-700/80 p-4"
         >
@@ -175,285 +230,121 @@
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
-              <h3 class="font-bold pb-4">Brightness and Contrast</h3>
-              <form method="POST" action="">
-              {% csrf_token %}
-              {% if imagen_url %}
-                <input type="hidden" name="imagen_actual" value="{{ imagen_url }}">
-              {% endif %}
+              <h3 class="font-bold">Brightness and Contrast</h3>
+              <div class="mt-4 space-y-4">
+                <div class="grid grid-cols-5 items-center gap-2">
 
-              <!-- Ejemplo slider con label arriba, fila con slider, valor y botón -->
-              <div class="mb-2">
-                <label for="slider-brillo" class="block text-sm ">Global Brightness</label>
-                <div class="flex items-center space-x-4">
+                  <label class="col-span-3 text-sm">Global Brightness</label>
                   <input
-                    id="slider-brillo"
-                    name="valor_brillo"
-                    type="range"
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
                     min="-1"
                     max="1"
-                    step="0.01"
-                    value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
-                  />
-                  <span id="output-brillo" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_brillo"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <label for="slider-r" class="block text-sm">R Channel</label>
-                <div class="flex items-center space-x-4">
-                  <input
-                    id="slider-r"
-                    name="valor_r"
                     type="range"
-                    min="-1"
-                    max="1"
                     step="0.01"
                     value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
+                    id="slider_brillo"
+                    oninput="updateBrightness()"
                   />
-                  <span id="output-r" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_brillo_R"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
                 </div>
-              </div>
 
-              <div class="mb-2">
-                <label for="slider-g" class="block text-sm">G Channel</label>
-                <div class="flex items-center space-x-4">
+
+                <div class="grid grid-cols-5 items-center gap-2">
+                  <label class="col-span-3 text-sm">R Channel</label>
                   <input
-                    id="slider-g"
-                    name="valor_g"
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
+                    max="100"
+                    min="0"
                     type="range"
-                    min="-1"
-                    max="1"
-                    step="0.01"
-                    value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
-                  <span id="output-g" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_brillo_G"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
                 </div>
-              </div>
-
-              <div class="mb-2">
-                <label for="slider-b" class="block text-sm">B Channel</label>
-                <div class="flex items-center space-x-4">
+                <div class="grid grid-cols-5 items-center gap-2">
+                  <label class="col-span-3 text-sm">G Channel</label>
                   <input
-                    id="slider-b"
-                    name="valor_b"
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
+                    max="100"
+                    min="0"
                     type="range"
-                    min="-1"
-                    max="1"
-                    step="0.01"
-                    value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
-                  <span id="output-b" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_brillo_B"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
                 </div>
-              </div>
-
-              <div class="mb-2">
-                <label for="slider-logarithmic" class="block text-sm">Logarithmic Contrast</label>
-                <div class="flex items-center space-x-4">
+                <div class="grid grid-cols-5 items-center gap-2">
+                  <label class="col-span-3 text-sm">B Channel</label>
                   <input
-                    id="slider-logarithmic"
-                    name="valor_logarithmic"
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
+                    max="100"
+                    min="0"
                     type="range"
-                    min="-1"
-                    max="1"
-                    step="0.01"
-                    value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
-                  <span id="output-logarithmic" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_contraste_logaritmico"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
                 </div>
-              </div>
-
-              <div class="mb-2">
-                <label for="slider-exponential" class="block text-sm">Exponential Contrast</label>
-                <div class="flex items-center space-x-4">
+                <div class="grid grid-cols-5 items-center gap-2">
+                  <label class="col-span-3 text-sm">Logarithmic Contrast</label>
                   <input
-                    id="slider-exponential"
-                    name="valor_exponential"
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
+                    max="100"
+                    min="0"
                     type="range"
-                    min="-1"
-                    max="1"
-                    step="0.01"
-                    value="0"
-                    class="flex-1 h-2 rounded-full bg-gray-200 dark:bg-gray-700 cursor-pointer slider-thumb appearance-none"
                   />
-                  <span id="output-exponential" class="w-12 text-center font-mono text-sm text-gray-700 dark:text-gray-300">0</span>
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="aplicar_contraste_exponencial"
-                    class="w-8 h-8 flex items-center justify-center rounded bg-primary/10 hover:bg-primary/20"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 text-primary">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
                 </div>
-              </div>
-            </form>
-
+                <div class="grid grid-cols-5 items-center gap-2">
+                  <label class="col-span-3 text-sm">Exponential Contrast</label>
+                  <input
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
+                    max="100"
+                    min="0"
+                    type="range"
+                  />
+                </div>
               </div>
             </div>
-
-
-
-
-
-
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
               <h3 class="font-bold">Layers and Colors</h3>
-              <form method="POST" action="">
-                {% csrf_token %}
-                {% if imagen_url %}
-                  <input type="hidden" name="imagen_actual" value="{{ imagen_url }}">
-                {% endif %}
-
-                <div class="mt-4 grid grid-cols-2 gap-2">
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_R"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract R
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_C"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract C
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_G"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract G
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_M"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract M
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_B"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract B
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="extract_Y"
-                    class="w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 
-                          dark:bg-primary/20 dark:hover:bg-primary/30">
-                    Extract Y
-                  </button>
-
-                  <button
-                    type="submit"
-                    name="accion"
-                    value="negativo"
-                    class=" w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20      
-                          dark:hover:bg-primary/30 col-span-2">
-                    Negative
-                  </button>
-
-                </div>
-
-                <select
-                  name="tipo_grises"
-                  class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark
-                        focus:border-primary focus:ring-primary">
-                  <option value="">Grayscale</option>
-                  <option value="average">Average</option>
-                  <option value="luminosity">Luminosity</option>
-                  <option value="midgray">Midgray</option>
-                  </select>
+              <div class="mt-4 grid grid-cols-2 gap-2">
                 <button
-                  type="submit"
-                  name="accion"
-                  value="grayscale"
-                  class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20">
-                  Apply Grayscale
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract R
                 </button>
-              </form>
-
-            
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract G
+                </button>
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract B
+                </button>
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract C
+                </button>
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract M
+                </button>
+                <button
+                  class="rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                >
+                  Extract Y
+                </button>
+              </div>
+              <button
+                class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+              >
+                Negative
+              </button>
+              <select
+                class="mt-2 w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
+              >
+                <option>Grayscale</option>
+                <option>Average</option>
+                <option>Luminosity</option>
+                <option>Mid-gray</option>
+              </select>
             </div>
-
-
-
-
             <div
               class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4"
             >
@@ -591,31 +482,10 @@
         class="border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-2 text-center text-xs text-gray-500"
       >
         <p>
-          Proyecto académico – Juan Pablo García – Facultad de Ingenierías -
+          Proyecto académico – Juan Pablo García – Facultad de Ingenierías |
           Ingeniería de Sistemas y Computación.
         </p>
       </footer>
     </div>
-
-  <script>
-    // Función para actualizar el valor visible para cada slider
-    function actualizarValor(idSlider, idOutput) {
-      const slider = document.getElementById(idSlider);
-      const output = document.getElementById(idOutput);
-
-      slider.addEventListener('input', () => {
-        output.textContent = slider.value;
-      });
-      output.textContent = slider.value;
-    }
-
-    actualizarValor('slider-brillo', 'output-brillo');
-    actualizarValor('slider-r', 'output-r');
-    actualizarValor('slider-g', 'output-g');
-    actualizarValor('slider-b', 'output-b');
-    actualizarValor('slider-logarithmic', 'output-logarithmic');
-    actualizarValor('slider-exponential', 'output-exponential');
-  </script>
-
   </body>
 </html>
