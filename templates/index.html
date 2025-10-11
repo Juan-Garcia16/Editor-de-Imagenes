@@ -235,7 +235,31 @@
         const tipo = document.getElementById('grayscale_type').value;
         // enviar la acción y el parámetro 'tipo'
         applyAction('grayscale', { tipo: tipo });
-  }
+      }
+
+      function sendCrop() {
+        if (!uploadedFile) {
+          console.error('No hay imagen cargada para recortar.');
+          return;
+        }
+
+        const xIni = parseInt(document.getElementById('crop_x_ini').value, 10);
+        const yIni = parseInt(document.getElementById('crop_y_ini').value, 10);
+        const xFin = parseInt(document.getElementById('crop_x_fin').value, 10);
+        const yFin = parseInt(document.getElementById('crop_y_fin').value, 10);
+
+        if (Number.isNaN(xIni) || Number.isNaN(yIni) || Number.isNaN(xFin) || Number.isNaN(yFin)) {
+          console.error('Valores de crop inválidos');
+          return;
+        }
+
+        applyAction('crop', {
+          crop_x_ini: xIni,
+          crop_y_ini: yIni,
+          crop_x_fin: xFin,
+          crop_y_fin: yFin
+        });
+      }
     </script>
   </head>
   <body
@@ -464,7 +488,7 @@
                   placeholder="Rotation (degrees)"
                   type="number"
                 />
-                <div class="grid grid-cols-2 gap-2">
+                <!-- <div class="grid grid-cols-2 gap-2">
                   <input
                     class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
                     placeholder="Translation dx"
@@ -475,31 +499,8 @@
                     placeholder="Translation dy"
                     type="number"
                   />
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <input
-                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
-                    placeholder="Crop xIni"
-                    type="number"
-                  />
-                  <input
-                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
-                    placeholder="Crop yIni"
-                    type="number"
-                  />
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <input
-                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
-                    placeholder="Crop xFin"
-                    type="number"
-                  />
-                  <input
-                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
-                    placeholder="Crop yFin"
-                    type="number"
-                  />
-                </div>
+                </div> -->
+
                 <div class="grid grid-cols-5 items-center gap-2 pt-2">
                   <label class="col-span-3 text-sm">Zoom/Reduction</label>
                   <input
@@ -509,6 +510,46 @@
                     type="range"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-gray-200/80 dark:border-gray-700/80 p-4">
+              <h3 class="font-bold">Cropping</h3>
+              <div class="mt-4 space-y-2">
+                <div class="grid grid-cols-2 gap-2">
+                  <input
+                    id="crop_x_ini"
+                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                    placeholder="Crop xIni"
+                    type="number"
+                  />
+                  <input
+                    id="crop_y_ini"
+                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                    placeholder="Crop yIni"
+                    type="number"
+                  />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input
+                    id="crop_x_fin"
+                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                    placeholder="Crop xFin"
+                    type="number"
+                  />
+                  <input
+                    id="crop_y_fin"
+                    class="w-full rounded border-gray-200/80 bg-background-light dark:border-gray-700/80 dark:bg-background-dark focus:border-primary focus:ring-primary"
+                    placeholder="Crop yFin"
+                    type="number"
+                  />
+                </div>
+                <button
+                  class="mt-2 w-full rounded bg-primary/10 px-3 py-2 text-sm text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30"
+                  onclick="sendCrop()"
+                  >
+                Crop
+              </button>
               </div>
             </div>
 
@@ -537,8 +578,15 @@
 
                 <div class="flex items-center gap-2 mt-3">
                   <label class="flex-1">Equalization factor</label>
-                  <input id="mergeFactor" type="range" min="0" max="1" step="0.01" value="0.5"
-                        oninput="mergeImages('merge_eq')" class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700">
+                  <input 
+                    id="mergeFactor" 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.01" 
+                    value="0.5"
+                    oninput="mergeImages('merge_eq')" 
+                    class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700">
                   <small id="mergeFactorLabel" class="w-10 text-right">0.50</small>
                 </div>
 
@@ -556,21 +604,24 @@
             >
               <h3 class="font-bold">Binarization</h3>
               <div class="mt-4 space-y-2">
-                <div class="grid grid-cols-5 items-center gap-2">
-                  <label class="col-span-3 text-sm">Threshold</label>
+                <div class="grid grid-cols-4 items-center gap-2">
+                  <label class="col-span-1 text-sm flex-1">Threshold</label>
                   <input
                     class="slider-thumb col-span-2 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 dark:bg-gray-700"
                     max="1"
                     min="0"
                     step="0.01"
                     type="range"
+                    id="slider_binarization"
+                    oninput="updateSliders('slider_binarization', 'binarization', 'binarization')"
                   />
+                  <small id="binarizationLabel" class="col-span-1">0.50</small>
                 </div>
-                <button
+                <!-- <button
                   class="w-full rounded bg-primary px-3 py-2 text-sm text-white hover:bg-primary/90"
                 >
                   Apply Binarization
-                </button>
+                </button> -->
               </div>
             </div>
             <div

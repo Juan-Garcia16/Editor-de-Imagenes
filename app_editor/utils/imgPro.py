@@ -216,16 +216,10 @@ def crop(img, xIni, yIni, xFin, yFin):
     Deja una sección rectangular de la imagen definida por las coordenadas
     (xIni, yIni) y (xFin, yFin), siendo esquina superior izquierda y esquina inferior derecha respectivamente.
     """
-    temp = yIni
-    yIni = xIni
-    xIni = temp
-    
-    temp = yFin
-    yFin = xFin
-    xFin = temp
-    
     img_copia = np.copy(img)
-    return img_copia[xIni:xFin, yIni:yFin]
+    # En numpy: primero filas (y), luego columnas (x)
+    return img_copia[yIni:yFin, xIni:xFin]
+
 
 def trasnslation(img, dx, dy):
     """

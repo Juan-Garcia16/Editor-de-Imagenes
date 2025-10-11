@@ -163,8 +163,28 @@ def process_image(request):
                 result_np = np.clip(result_np, 0, 1)
                 data_url = _to_data_url(result_np)
                 return JsonResponse({'image': data_url})
+            
+            elif action == 'binarization':
+                valor = float(request.POST.get("binarization", 0))
+                result_np = imgPro.binarize(img_np, valor)
+                
                                 
                     
+                    
+            elif action == 'crop':
+                try:
+                    x_ini = int(request.POST.get("crop_x_ini", 0)) # valores por defecto
+                    y_ini = int(request.POST.get("crop_y_ini", 0))
+                    x_fin = int(request.POST.get("crop_x_fin", img_np.shape[1])) # ancho maximo
+                    y_fin = int(request.POST.get("crop_y_fin", img_np.shape[0])) # alto maximo
+                except ValueError:
+                    return JsonResponse({"error":"Parámetros de crop inválidos"}, status=400)
+                
+                # Validar coordenadas
+                if not (0 <= x_ini < x_fin <= img_np.shape[1]) or not (0 <= y_ini < y_fin <= img_np.shape[0]):
+                    return JsonResponse({"error":"Coordenadas de recorte fuera de rango"}, status=400)
+                
+                result_np = imgPro.crop(img_np, x_ini, y_ini, x_fin, y_fin)
                     
                     
                     
